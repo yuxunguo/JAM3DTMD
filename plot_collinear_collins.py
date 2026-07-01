@@ -1,21 +1,7 @@
-"""Plot z times the collinear first moment of the pion Collins function.
-
-For the JAM3D Gaussian Collins TMD,
-
-    H1perp(z, pT) = 2 z^2 Mh^2 / width * collinear(z)
-                    * exp(-z^2 pT^2 / width) / (pi width)
-
-the requested moment
-
-    H1perp(1)(z) = z^2 int d^2pT pT^2 / (2 Mh^2) H1perp(z, z^2 pT^2)
-
-is exactly the collinear Collins factor returned by
-``conf["collinspi"].get_C(z, Q2)``. This script plots z H1perp(1)(z).
-"""
+"""Plot z times the collinear first moment of the pion Collins function."""
 
 from __future__ import annotations
 
-import csv
 import math
 from pathlib import Path
 
@@ -24,65 +10,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from generate_collins_grid import FLAVOR_INDEX, import_tmd, linspace, load_tmd
-from generate_collins_grid import select_replicas, validate_flavors
-
-
-def compute_collinear_collins(
-    tmd,
-    z_grid: list[float],
-    q2: float,
-    flavors: list[str],
-    replicas: list[int],
-):
-    from tools.config import conf
-
-    collins = conf["collinspi"]
-    flavor_indices = [(flavor, FLAVOR_INDEX[flavor]) for flavor in flavors]
-    sums = [[0.0 for _ in flavor_indices] for _ in z_grid]
-    sums_sq = [[0.0 for _ in flavor_indices] for _ in z_grid]
-
-    for irep in replicas:
-        tmd.parman.set_new_params(tmd.par[irep], initial=True)
-        for z_index, z in enumerate(z_grid):
-            values = collins.get_C(z, q2)
-            for flavor_position, (_flavor, flavor_index) in enumerate(flavor_indices):
-                value = z * float(values[flavor_index])
-                sums[z_index][flavor_position] += value
-                sums_sq[z_index][flavor_position] += value * value
-
-    nrep = len(replicas)
-    for z_index, z in enumerate(z_grid):
-        for flavor_position, (flavor, flavor_index) in enumerate(flavor_indices):
-            mean = sums[z_index][flavor_position] / nrep
-            mean_sq = sums_sq[z_index][flavor_position] / nrep
-            variance = max(mean_sq - mean * mean, 0.0)
-            yield {
-                "z": z,
-                "Q2": q2,
-                "flavor": flavor,
-                "flavor_index": flavor_index,
-                "nrep": nrep,
-                "zH1perp1_mean": mean,
-                "zH1perp1_std": math.sqrt(variance),
-            }
-
-
-def write_rows(rows: list[dict[str, float | int | str]], output: Path) -> None:
-    output.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = [
-        "z",
-        "Q2",
-        "flavor",
-        "flavor_index",
-        "nrep",
-        "zH1perp1_mean",
-        "zH1perp1_std",
-    ]
-    with output.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+from Collins import linspace, load_collins_fit, output_path, write_rows
+from Collins import z_collinear_collins_rows
 
 
 def plot_rows(
@@ -103,8 +32,8 @@ def plot_rows(
 
     for ax, flavor in zip(flat_axes, flavors):
         flavor_rows = [row for row in rows if row["flavor"] == flavor]
-        means = [float(row["zH1perp1_mean"]) for row in flavor_rows]
-        stds = [float(row["zH1perp1_std"]) for row in flavor_rows]
+        means = [float(row["mean"]) for row in flavor_rows]
+        stds = [float(row["std"]) for row in flavor_rows]
         lower = [mean - std for mean, std in zip(means, stds)]
         upper = [mean + std for mean, std in zip(means, stds)]
         line = ax.plot(z_grid, means, linewidth=1.8)[0]
@@ -130,39 +59,53 @@ def plot_rows(
 
 def main() -> None:
     Q2 = 4.0
-    Z_GRID = linspace(0.01, 0.99, 200)
+    Z_GRID = linspace(0.20, 0.99, 200)
     FLAVORS = ["u", "ub", "d", "db", "s", "sb", "c", "cb", "b", "bb"]
     REPLICA_SELECTION = 50
     TAG = "JAM3D_2022"
-    CSV_OUTPUT = Path("z_collinear_collins.csv")
-    PLOT_OUTPUT = Path("z_collinear_collins.png")
-    JAM3DLIB_PATH = None
-    JAM3D_DEV_LIB_PATH = None
+    CSV_OUTPUT = output_path("z_collinear_collins.csv")
+    PLOT_OUTPUT = output_path("z_collinear_collins.png")
 
-    flavors = validate_flavors(FLAVORS)
-    TMD, jam3dlib_path, jam3d_dev_lib_path = import_tmd(
-        JAM3DLIB_PATH,
-        JAM3D_DEV_LIB_PATH,
+    tmd, replicas, jam3dlib_path, jam3d_dev_lib_path = load_collins_fit(
+        tag=TAG,
+        replica_selection=REPLICA_SELECTION,
     )
-    tmd = load_tmd(TMD, TAG, jam3dlib_path)
-    replicas = select_replicas(REPLICA_SELECTION, tmd.nrep)
-    if not replicas:
-        raise SystemExit("No valid replicas selected.")
-
-    rows = list(
-        compute_collinear_collins(
-            tmd=tmd,
-            z_grid=Z_GRID,
-            q2=Q2,
-            flavors=flavors,
-            replicas=replicas,
-        )
+    rows = z_collinear_collins_rows(
+        tmd=tmd,
+        z_grid=Z_GRID,
+        q2=Q2,
+        flavors=FLAVORS,
+        replicas=replicas,
     )
-    write_rows(rows, CSV_OUTPUT)
-    plot_rows(rows, Z_GRID, flavors, PLOT_OUTPUT)
+    output_rows = [
+        {
+            "z": row["z"],
+            "Q2": row["Q2"],
+            "flavor": row["flavor"],
+            "flavor_index": row["flavor_index"],
+            "nrep": row["nrep"],
+            "zH1perp1_mean": row["mean"],
+            "zH1perp1_std": row["std"],
+        }
+        for row in rows
+    ]
+    write_rows(
+        rows=output_rows,
+        output=CSV_OUTPUT,
+        fieldnames=[
+            "z",
+            "Q2",
+            "flavor",
+            "flavor_index",
+            "nrep",
+            "zH1perp1_mean",
+            "zH1perp1_std",
+        ],
+    )
+    plot_rows(rows, Z_GRID, FLAVORS, PLOT_OUTPUT)
 
     print(
-        f"Wrote {CSV_OUTPUT} and {PLOT_OUTPUT} for {len(flavors)} flavors, "
+        f"Wrote {CSV_OUTPUT} and {PLOT_OUTPUT} for {len(FLAVORS)} flavors, "
         f"{len(Z_GRID)} z-points, and {len(replicas)} replicas.\n"
         f"jam3dlib: {jam3dlib_path}\n"
         f"jam3d_dev_lib: {jam3d_dev_lib_path}"
