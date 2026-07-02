@@ -20,6 +20,7 @@ def plot_rows(
     flavors: list[str],
     output: Path,
 ) -> None:
+    """Plot replica mean bands for z times the collinear Collins function."""
     ncols = 2
     nrows = math.ceil(len(flavors) / ncols)
     fig, axes = plt.subplots(
@@ -58,6 +59,7 @@ def plot_rows(
 
 
 def main() -> None:
+    """Write a CSV and plot of z-weighted collinear pion Collins moments."""
     Q2 = 4.0
     Z_GRID = linspace(0.20, 0.99, 200)
     FLAVORS = ["u", "ub", "d", "db", "s", "sb", "c", "cb", "b", "bb"]

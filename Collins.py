@@ -9,7 +9,7 @@ import os
 import sys
 import types
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Sequence
 
 
 FLAVOR_INDEX = {
@@ -42,6 +42,7 @@ DEFAULT_JAM3D_DEV_LIB_PATHS = (
 
 
 def linspace(start: float, stop: float, count: int) -> list[float]:
+    """Return count evenly spaced points including both endpoints."""
     if count < 1:
         raise ValueError("grid count must be positive")
     if count == 1:
@@ -54,6 +55,7 @@ def select_replicas(
     selection: int | tuple[int, int] | list[int] | str,
     nrep: int,
 ) -> list[int]:
+    """Expand a replica selection into valid JAM3D replica indices."""
     if selection == "all":
         return list(range(nrep))
     if isinstance(selection, int):
@@ -65,6 +67,7 @@ def select_replicas(
 
 
 def validate_flavors(flavors: list[str]) -> list[str]:
+    """Validate flavor labels used by this analysis and return them unchanged."""
     unknown = [flavor for flavor in flavors if flavor not in FLAVOR_INDEX]
     if unknown:
         names = ", ".join(sorted(FLAVOR_INDEX))
@@ -79,6 +82,7 @@ def write_rows(
     output: Path,
     fieldnames: list[str],
 ) -> None:
+    """Write dictionaries to a CSV file, creating the output directory first."""
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fieldnames)
@@ -87,10 +91,12 @@ def write_rows(
 
 
 def output_path(filename: str) -> Path:
+    """Return a path inside the repository Output directory."""
     return OUTPUT_DIR / filename
 
 
 def path_from_env(name: str) -> Path | None:
+    """Read a filesystem path from an environment variable if it is set."""
     value = os.environ.get(name)
     return Path(value).expanduser() if value else None
 
@@ -102,6 +108,7 @@ def resolve_library_path(
     candidates: tuple[Path, ...],
     marker_file: str,
 ) -> Path:
+    """Resolve a JAM3D library path from env, explicit config, or local defaults."""
     paths = [path for path in (path_from_env(env_name), configured) if path is not None]
     paths.extend(candidates)
 
@@ -121,6 +128,7 @@ def resolve_library_path(
 
 
 def install_jam3d_compatibility_shims() -> None:
+    """Install small compatibility modules needed by the bundled JAM3D code."""
     from scipy import special
 
     class _ZmqUnavailableError(RuntimeError):
@@ -168,6 +176,7 @@ def install_jam3d_compatibility_shims() -> None:
 
 
 def import_tmd(jam3dlib: Path | None, jam3d_dev_lib: Path | None):
+    """Load JAM3D paths, install shims, and import the public TMD wrapper."""
     jam3dlib = resolve_library_path(
         label="jam3dlib",
         configured=jam3dlib,
@@ -195,6 +204,7 @@ def import_tmd(jam3dlib: Path | None, jam3d_dev_lib: Path | None):
 
 
 def load_tmd(TMD, tag: str, jam3dlib_path: Path):
+    """Instantiate a JAM3D TMD object from the jam3dlib data directory."""
     old_cwd = Path.cwd()
     os.chdir(jam3dlib_path)
     tmd = TMD(tag)
@@ -208,6 +218,7 @@ def load_collins_fit(
     jam3dlib_path: Path | None = None,
     jam3d_dev_lib_path: Path | None = None,
 ):
+    """Load a JAM3D fit and return its TMD wrapper plus selected replicas."""
     TMD, resolved_jam3dlib, resolved_jam3d_dev_lib = import_tmd(
         jam3dlib_path,
         jam3d_dev_lib_path,
@@ -220,6 +231,7 @@ def load_collins_fit(
 
 
 def flavor_indices(flavors: list[str]) -> list[tuple[str, int]]:
+    """Map flavor labels to JAM3D flavor-array indices."""
     return [(flavor, FLAVOR_INDEX[flavor]) for flavor in validate_flavors(flavors)]
 
 
@@ -227,18 +239,18 @@ def mean_std_rows(
     coordinates: list[dict[str, float]],
     flavors: list[str],
     replicas: list[int],
-    set_replica: Callable[[int], None],
-    value_func: Callable[[dict[str, float], int], float],
+    value_func: Callable[[dict[str, float], int], Sequence[float]],
 ) -> list[dict[str, float | int | str]]:
+    """Evaluate replica-dependent flavor vectors and summarize mean/std rows."""
     indexed_flavors = flavor_indices(flavors)
     sums = [[0.0 for _ in indexed_flavors] for _ in coordinates]
     sums_sq = [[0.0 for _ in indexed_flavors] for _ in coordinates]
 
     for irep in replicas:
-        set_replica(irep)
         for coord_index, coord in enumerate(coordinates):
+            values = value_func(coord, irep)
             for flavor_position, (_flavor, flavor_index) in enumerate(indexed_flavors):
-                value = value_func(coord, flavor_index)
+                value = float(values[flavor_index])
                 sums[coord_index][flavor_position] += value
                 sums_sq[coord_index][flavor_position] += value * value
 
@@ -263,12 +275,6 @@ def mean_std_rows(
     return rows
 
 
-def collins_distribution():
-    from tools.config import conf
-
-    return conf["collinspi"]
-
-
 def collins_tmd_grid_rows(
     tmd,
     z_grid: list[float],
@@ -278,20 +284,22 @@ def collins_tmd_grid_rows(
     replicas: list[int],
     weighted: bool,
 ) -> list[dict[str, float | int | str]]:
-    collins = collins_distribution()
+    """Build mean/std rows for the pion Collins TMD over a z and pT grid.
+
+    The TMD values are evaluated through JAM3D's public tmd.eval wrapper, using
+    the same argument order shown in JAM3D_Library.ipynb.
+    """
     coordinates = [{"z": z, "pT": pt, "Q2": q2} for z in z_grid for pt in pt_grid]
 
-    def set_replica(irep: int) -> None:
-        tmd.parman.set_new_params(tmd.par[irep], initial=True)
-
-    def value_func(coord: dict[str, float], flavor_index: int) -> float:
+    def value_func(coord: dict[str, float], irep: int) -> Sequence[float]:
         z = coord["z"]
         pt = coord["pT"]
-        values = collins.get_tmd(z, q2, pt, "pi", "collinspi", icol=False)
+        # Explicit JAM3D wrapper call: icol=False returns the full pT-dependent TMD.
+        values = tmd.eval(z, q2, pt, "pi", "collinspi", irep, icol=False)
         weight = z**2 * pt**2 / (2.0 * MPI_GEV**2) if weighted else 1.0
-        return weight * float(values[flavor_index])
+        return weight * values
 
-    return mean_std_rows(coordinates, flavors, replicas, set_replica, value_func)
+    return mean_std_rows(coordinates, flavors, replicas, value_func)
 
 
 def z_collinear_collins_rows(
@@ -301,18 +309,17 @@ def z_collinear_collins_rows(
     flavors: list[str],
     replicas: list[int],
 ) -> list[dict[str, float | int | str]]:
-    collins = collins_distribution()
+    """Build mean/std rows for z times the collinear pion Collins function."""
     coordinates = [{"z": z, "Q2": q2} for z in z_grid]
 
-    def set_replica(irep: int) -> None:
-        tmd.parman.set_new_params(tmd.par[irep], initial=True)
-
-    def value_func(coord: dict[str, float], flavor_index: int) -> float:
+    def value_func(coord: dict[str, float], irep: int) -> Sequence[float]:
         z = coord["z"]
-        values = collins.get_C(z, q2)
-        return z * float(values[flavor_index])
+        # Explicit note: icol=True returns the collinear get_C(z, Q2) piece.
+        # The kT argument is required by tmd.eval but ignored in this mode.
+        values = tmd.eval(z, q2, 0.0, "pi", "collinspi", irep, icol=True)
+        return z * values
 
-    return mean_std_rows(coordinates, flavors, replicas, set_replica, value_func)
+    return mean_std_rows(coordinates, flavors, replicas, value_func)
 
 
 def fixed_z_weighted_collins_rows(
@@ -323,16 +330,14 @@ def fixed_z_weighted_collins_rows(
     flavors: list[str],
     replicas: list[int],
 ) -> list[dict[str, float | int | str]]:
-    collins = collins_distribution()
+    """Build mean/std rows for weighted pion Collins TMD values at fixed z."""
     coordinates = [{"z": z, "pT": pt, "z_pT": z * pt, "Q2": q2} for pt in pt_grid]
 
-    def set_replica(irep: int) -> None:
-        tmd.parman.set_new_params(tmd.par[irep], initial=True)
-
-    def value_func(coord: dict[str, float], flavor_index: int) -> float:
+    def value_func(coord: dict[str, float], irep: int) -> Sequence[float]:
         pt = coord["pT"]
-        values = collins.get_tmd(z, q2, pt, "pi", "collinspi", icol=False)
+        # Explicit JAM3D wrapper call: icol=False returns the full pT-dependent TMD.
+        values = tmd.eval(z, q2, pt, "pi", "collinspi", irep, icol=False)
         weight = z**2 * pt**2 / (2.0 * MPI_GEV**2)
-        return weight * float(values[flavor_index])
+        return weight * values
 
-    return mean_std_rows(coordinates, flavors, replicas, set_replica, value_func)
+    return mean_std_rows(coordinates, flavors, replicas, value_func)

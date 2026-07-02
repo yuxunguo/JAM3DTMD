@@ -21,6 +21,7 @@ def plot_rows(
     flavors: list[str],
     output: Path,
 ) -> None:
+    """Plot favored/unfavored replica bands for weighted Collins TMD values."""
     colors = {"fav": "red", "unf": "blue"}
     fig, ax = plt.subplots(figsize=(6.8, 5.0), facecolor="white")
     ax.set_facecolor("white")
@@ -65,6 +66,7 @@ def plot_rows(
 
 
 def main() -> None:
+    """Write a CSV and plot of weighted Collins TMD bands at fixed z."""
     Z = 0.3
     Q2 = 4.0
     PT_GRID = linspace(0.0, 1.0, 200)
