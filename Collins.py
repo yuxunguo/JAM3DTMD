@@ -341,3 +341,22 @@ def fixed_z_weighted_collins_rows(
         return weight * values
 
     return mean_std_rows(coordinates, flavors, replicas, value_func)
+
+
+def fixed_z_unpolarized_ff_rows(
+    tmd,
+    z: float,
+    pt_grid: list[float],
+    q2: float,
+    flavors: list[str],
+    replicas: list[int],
+) -> list[dict[str, float | int | str]]:
+    """Build mean/std rows for unpolarized pion TMD FF values at fixed z."""
+    coordinates = [{"z": z, "pT": pt, "z_pT": z * pt, "Q2": q2} for pt in pt_grid]
+
+    def value_func(coord: dict[str, float], irep: int) -> Sequence[float]:
+        pt = coord["pT"]
+        values = tmd.eval(z, q2, pt, "pi", "ff", irep, icol=False)
+        return values
+
+    return mean_std_rows(coordinates, flavors, replicas, value_func)
