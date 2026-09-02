@@ -1,0 +1,301 @@
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,slashed}
+\usepackage[margin=0.75in]{geometry}
+
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\id}{\mathbb{I}}
+
+\begin{document}
+\begin{center}
+{\Large\bfseries Spin-Density Matrix and Fragmentation Cross Section}
+\end{center}
+\vspace{0.25em}
+\small
+
+\section{Hard spin density matrix and Fragmentation Cross Section}
+
+In a common Cartesian spin basis,
+\[
+\rho=\frac14\left[
+\id\otimes\id+B_i\sigma^i\otimes\id
++\bar B_j\id\otimes\sigma^j
++C_{ij}\sigma^i\otimes\sigma^j\right],
+\qquad i,j=x,y,z .
+\]
+Thus \(B_i\), \(\bar B_j\), and \(C_{ij}\) are respectively the quark
+polarization, antiquark polarization, and spin-correlation tensor. Insert the two fragmentation spin factors directly on the two spin lines:
+\begin{align*}
+{\cal K}
+&=\Tr_{s\bar s}\!\left\{\rho\,
+(D_1\id+a_i\sigma^i)\otimes
+(\bar D_1\id+\bar a_j\sigma^j)\right\}
+\\
+&=D_1\bar D_1+B_i\bar D_1a_i
++\bar B_jD_1\bar a_j+C_{ij}a_i\bar a_j .
+\end{align*}
+Here \(\Tr\sigma^i=0\) and
+\(\Tr(\sigma^i\sigma^j)=2\delta^{ij}\).
+Equivalently,
+\[
+{\cal K}=w_0+B_iw_{B_i}+\bar B_jw_{\bar B_j}+C_{ij}w_{C_{ij}},
+\qquad
+(w_0,w_{B_i},w_{\bar B_j},w_{C_{ij}})
+=(D_1\bar D_1,\bar D_1a_i,D_1\bar a_j,a_i\bar a_j).
+\]
+
+\section{Calculate \(D_1\) and \(a_i\) with the spin projector}
+
+The fragmentation correlator has open Dirac indices:
+\begin{align*}
+\Delta_{ab}(k;P_1,P_2)=\sum_X\int\frac{d^4\xi}{(2\pi)^4}e^{ik\cdot\xi}
+&\langle0|{\cal W}\psi_a(\xi)|P_1P_2,X\rangle
+\langle P_1P_2,X|\bar\psi_b(0){\cal W}|0\rangle ,
+\end{align*}
+evaluated with \(k^+\equiv Q\) fixed (the frame with \(P_{h\perp}=0\),
+\(Q\) the large light-cone momentum of the fragmenting quark) and
+integrated over the small component \(k^-\).  At leading twist \(\Delta\)
+is built entirely from the structures \(\gamma^-\), \(\gamma^-\gamma_5\),
+\(i\sigma^{i-}\gamma_5\) (\(i=x,y\)).  \(D_1\) and \(a_i\) are the
+coefficients of these structures, read off by contracting \(\Delta\) with
+the \emph{conjugate} light-cone direction \(n\) (\(n^2=0\), \(n\cdot k=1\),
+\(\slashed n=\gamma^+/Q\)): since \(\Tr[\gamma^+\gamma^-]\neq0\) while
+\(\Tr[\gamma^-\gamma^-]=0\), only \(\gamma^+\)-type insertions have a
+nonzero overlap with \(\Delta\).  Formally, write
+\[
+{\cal D}(S)=\frac1{4z}\int dk^-\Tr_D\!\left[\Delta\,\gamma^+(1+\gamma_5\slashed S)\right]
+\Big|_{\text{transverse }S}
+=D_1+S_ra_r ,
+\qquad r=x,y ,
+\]
+which, using the exact identity \(\gamma^+\gamma_5\slashed e_r=i\sigma^{r+}\gamma_5\)
+(\(\slashed e_r=-\gamma^r\)), gives
+\[
+D_1=\frac1{4z}\int dk^-\Tr_D[\gamma^+\Delta],
+\qquad
+a_r=\frac1{4z}\int dk^-\Tr_D[i\sigma^{r+}\gamma_5\Delta],
+\quad r=x,y .
+\]
+The longitudinal component is probed directly by \(\gamma_5\) alone,
+without an extra slashed unit vector (inserting \(\gamma_5\slashed e_z\)
+would produce a structure orthogonal to every term in \(\Delta\)):
+\[
+a_z=\frac1{4z}\int dk^-\Tr_D[\gamma^+\gamma_5\Delta] .
+\]
+Evaluating these three traces against the leading-twist parametrization
+of \(\Delta\) gives
+\begin{align*}
+D_1&=\frac1{4z}\int dk^-\Tr_D[\gamma^+\Delta],
+\\
+a_z&=\frac1{4z}\int dk^-\Tr_D[\gamma^+\gamma_5\Delta]
+=\frac{\epsilon_T^{mn}R_{Tm}k_{Tn}}{M_1M_2}G_1^\perp,
+\\
+a_r&=\frac1{4z}\int dk^-\Tr_D[i\sigma^{r+}\gamma_5\Delta]
+=\frac{\epsilon_T^{rn}R_{Tn}}{M_1+M_2}H_1^{\sphericalangle}
++\frac{\epsilon_T^{rn}k_{Tn}}{M_1+M_2}H_1^\perp,
+\quad r=x,y .
+\end{align*}
+
+For the reduced choice \(H_1^\perp=0\), with
+\(\boldsymbol k_T=-\boldsymbol P_{hT}/z\) and
+\(\epsilon_T^{xy}=1\), abbreviate
+\[
+\kappa=\frac{R_T}{M_1+M_2}H_1^{\sphericalangle},
+\qquad
+\lambda=\frac{R_TP_{hT}}{zM_1M_2}G_1^\perp,
+\]
+so that
+\[
+\mathbf a\equiv\begin{pmatrix}a_x\\a_y\\a_z\end{pmatrix}
+=\begin{pmatrix}\kappa\sin\phi_R\\-\kappa\cos\phi_R\\
+\lambda\sin(\phi_R-\phi_h)\end{pmatrix} .
+\]
+\paragraph{Antiquark side.} The antiquark moves in the \emph{opposite}
+direction, with large light-cone component \(k'^-\equiv\bar Q\) instead
+of \(k'^+\).  Its correlator \(\bar\Delta\) is therefore built at leading
+twist from the \emph{mirror} structures \(\gamma^+,\gamma^+\gamma_5,
+i\sigma^{i+}\gamma_5\), and \(\bar D_1,\bar a_i\) must be extracted with
+the conjugate projectors \(\gamma^-,\gamma^-\gamma_5,i\sigma^{r-}\gamma_5\)
+— every \(+\leftrightarrow-\) exchanged relative to the quark case:
+\[
+\bar D_1=\frac1{4\bar z}\int dk'^+\Tr_D[\gamma^-\bar\Delta],
+\quad
+\bar a_z=\frac1{4\bar z}\int dk'^+\Tr_D[\gamma^-\gamma_5\bar\Delta],
+\quad
+\bar a_r=\frac1{4\bar z}\int dk'^+\Tr_D[i\sigma^{r-}\gamma_5\bar\Delta].
+\]
+Charge conjugation relates the antiquark correlator to the quark one with
+an extra relative minus sign on every spin-dependent (\(G_1^\perp\)- and
+\(H_1\)-type) structure, while the spin-independent \(D_1\) term is
+unaffected.  Hence barring every fragmentation variable is \emph{not}
+sufficient:
+\[
+\bar D_1=D_1\big|_{\rm barred},
+\qquad
+\bar a_i=-\,a_i\big|_{\rm barred} ,
+\qquad i=x,y,z ,
+\]
+where "barred" means every kinematic variable and fragmentation function
+on the right (\(z,M_1,M_2,R_T,P_{hT},\phi_R,\phi_h,H_1^{\sphericalangle},
+G_1^\perp\)) is replaced by its antiquark counterpart.  With
+\(\bar\kappa,\bar\lambda\) denoting \(\kappa,\lambda\) barred, this gives
+\[
+\bar{\mathbf a}\equiv\begin{pmatrix}\bar a_x\\\bar a_y\\\bar a_z\end{pmatrix}
+=\begin{pmatrix}-\bar\kappa\sin\bar\phi_R\\\bar\kappa\cos\bar\phi_R\\
+-\bar\lambda\sin(\bar\phi_R-\bar\phi_h)\end{pmatrix} .
+\]
+If only one fragmentation is observed, the spin factor reduces to
+\({\cal K}_{\rm one}=D_1+B_i a_i\).
+
+\section{Spin weights in terms of the fragmentation functions}
+
+With \(\mathbf a,\bar{\mathbf a}\) as defined in Sec.~2, insert the
+results of Sec.~2 (with \(H_1^\perp=0\)) into
+\(\mathbf w_B=\bar D_1\mathbf a\), \(\mathbf w_{\bar B}=D_1\bar{\mathbf a}\),
+and \(W_C=\mathbf a\,\bar{\mathbf a}^{\,T}\).  The single-spin weight
+vectors are
+\[
+\mathbf w_B=\bar D_1
+\begin{pmatrix}\kappa\sin\phi_R\\-\kappa\cos\phi_R\\
+\lambda\sin(\phi_R-\phi_h)\end{pmatrix},
+\qquad
+\mathbf w_{\bar B}=D_1
+\begin{pmatrix}-\bar\kappa\sin\bar\phi_R\\\bar\kappa\cos\bar\phi_R\\
+-\bar\lambda\sin(\bar\phi_R-\bar\phi_h)\end{pmatrix},
+\]
+and the correlation-weight matrix is the outer product
+\[
+W_C=\mathbf a\,\bar{\mathbf a}^{\,T}=
+\begin{pmatrix}
+-\kappa\bar\kappa\sin\phi_R\sin\bar\phi_R &
+\kappa\bar\kappa\sin\phi_R\cos\bar\phi_R &
+-\kappa\bar\lambda\sin\phi_R\sin(\bar\phi_R-\bar\phi_h)
+\\[2pt]
+\kappa\bar\kappa\cos\phi_R\sin\bar\phi_R &
+-\kappa\bar\kappa\cos\phi_R\cos\bar\phi_R &
+\kappa\bar\lambda\cos\phi_R\sin(\bar\phi_R-\bar\phi_h)
+\\[2pt]
+-\lambda\bar\kappa\sin(\phi_R-\phi_h)\sin\bar\phi_R &
+\lambda\bar\kappa\sin(\phi_R-\phi_h)\cos\bar\phi_R &
+-\lambda\bar\lambda\sin(\phi_R-\phi_h)\sin(\bar\phi_R-\bar\phi_h)
+\end{pmatrix} .
+\]
+Every entry of \(\mathbf w_B\), \(\mathbf w_{\bar B}\), and \(W_C\) is thus
+expressed directly in terms of the collinear-times-TMD fragmentation
+functions \(D_1\), \(H_1^{\sphericalangle}\), \(G_1^\perp\) (and their
+barred counterparts) together with the observed hadron-pair kinematics
+\(R_T,P_{hT},\phi_R,\phi_h\) (and barred).
+
+\section{Deriving \({\cal K}\) with the quark mass kept}
+
+Specialize Sec.~1 to \(e^+e^-\to\gamma^*\to q\bar q\), with \(\theta\)
+the quark production angle and
+\[
+\rho_m\equiv\frac{4m^2}{s},
+\quad
+A_0=1+\cos^2\theta,
+\quad
+B_0=\sin^2\theta,
+\quad
+A_U=A_0+\rho_mB_0 .
+\]
+Mass can enter through the hard vertex (\(B_i,\bar B_j,C_{ij}\)) or the
+fragmentation vertex (\(D_1,a_i\)).
+
+Contracting the leptonic tensor with the covariant spin sums
+\(u(k,S)\bar u(k,S)=\tfrac12(\slashed k+m)(1+\gamma_5\slashed S)\),
+\(v(k',S')\bar v(k',S')=\tfrac12(\slashed k'-m)(1+\gamma_5\slashed S')\)
+at the photon vertex gives the standard exact-in-\(m\) result: parity
+still forces \(B_i=\bar B_j=0\), and in the \((x,y,z)=(-r,n,k)\) axes of
+Sec.~1 (\(k\) along the quark momentum, \(r\) in the lepton-quark plane,
+\(n\) normal to it),
+\[
+C=\frac1{A_U}\begin{pmatrix}
+(1+\rho_m)B_0 & 0 & -2\sqrt{\rho_m}\sin\theta\cos\theta\\
+0 & -(1-\rho_m)B_0 & 0\\
+-2\sqrt{\rho_m}\sin\theta\cos\theta & 0 & A_0-\rho_mB_0
+\end{pmatrix} .
+\]
+
+\subsection*{Mass terms from the final-state quark propagator}
+
+Decompose the exact final-state spin sum by light-cone power,
+\[
+\slashed k+m
+=k^+\gamma^-+(\slashed k_\perp+m)+k^-\gamma^+,
+\qquad
+k^-=\frac{m^2+\boldsymbol k_\perp^2}{2k^+} ,
+\]
+and dress \(\Delta\)'s known structures with the full propagator instead
+of its truncation \(k^+\gamma^-\):
+\[
+\Delta_{\rm massive}=(\slashed k+m)D_1
++\gamma_5\gamma^0\gamma^3(\slashed k+m)\,X_zG_1^\perp
++\gamma^r\gamma_5(\slashed k+m)Y_r ,
+\]
+with \(X_z,Y_r\) as in Sec.~2.  Every trace of the subleading
+\((\slashed k_\perp+m)\) and \(k^-\gamma^+\) blocks against the Sec.~2
+projectors \(\gamma^+,\gamma^+\gamma_5,i\sigma^{r+}\gamma_5\) vanishes
+identically (verified by explicit Dirac-trace computation, keeping
+\(m,k^-,\boldsymbol k_\perp\) fully general):
+\[
+\Tr_D[\gamma^+(\slashed k_\perp+m)]=\Tr_D[\gamma^+\gamma^+]
+=\Tr_D[\gamma^+\gamma^0\gamma^3(\slashed k_\perp+m)]
+=\Tr_D[\gamma^+\gamma^0\gamma^3\gamma^+]
+=\Tr_D[i\sigma^{r+}\gamma_5(\slashed k_\perp+m)]
+=\Tr_D[i\sigma^{r+}\gamma_5\gamma^+]=0 .
+\]
+So \(D_1,a_z,a_r\) are unchanged at any order in \(m\) or
+\(\boldsymbol k_\perp\): the quark mass cannot enter through these three
+Dirac channels at all.
+
+It can only enter through a channel Sec.~2 never uses: the identity.
+The scalar term in \(\slashed k_\perp+m\) generates
+\(\Delta\supset\mathbb I\cdot E(z,\boldsymbol k_\perp;m)\), read off by
+the scalar trace \(E=\tfrac1{4z}\int dk^-\Tr_D[\Delta]\).  Since
+\(\Tr_D[\slashed k+m]=0+4m\), this ansatz gives \(E=mD_1\) directly from
+the \(+m\) in the propagator.  But
+\({\cal K}=\Tr_{s\bar s}[\rho(D_1\mathbb I+a_i\sigma^i)\otimes
+(\bar D_1\mathbb I+\bar a_j\sigma^j)]\) traces over quark-spin space, not
+Dirac space, so \(E\) cannot correct \(D_1\) or \(a_i\) inside it — it
+would enter only through a separate \(E\bar D_1+D_1\bar E\) term
+alongside \({\cal K}\), left out below.
+
+\subsection*{Result}
+
+\(D_1,a_i,\bar D_1,\bar a_i\) are mass-independent, so all of
+\({\cal K}\)'s mass dependence sits in \(C\).  With \(B_i=\bar B_j=0\),
+\({\cal K}=D_1\bar D_1+C_{ij}a_i\bar a_j\) is the bilinear form
+\[
+{\cal K}=D_1\bar D_1+\mathbf a^T C\,\bar{\mathbf a} ,
+\]
+using the same \(\mathbf a,\bar{\mathbf a}\) of Sec.~2.  Expanding the
+product gives
+\[
+\begin{aligned}
+{\cal K}={}&D_1\bar D_1
++\frac1{A_U}\Big[
+B_0\kappa\bar\kappa\cos(\phi_R+\bar\phi_R)
+-A_0\lambda\bar\lambda\sin(\phi_R-\phi_h)\sin(\bar\phi_R-\bar\phi_h)
+\Big]
+\\[2pt]
+&+\frac{\sqrt{\rho_m}\sin2\theta}{A_U}\Big[
+\kappa\bar\lambda\sin\phi_R\sin(\bar\phi_R-\bar\phi_h)
++\lambda\bar\kappa\sin(\phi_R-\phi_h)\sin\bar\phi_R
+\Big]
+\\[2pt]
+&+\frac{\rho_mB_0}{A_U}\Big[
+\lambda\bar\lambda\sin(\phi_R-\phi_h)\sin(\bar\phi_R-\bar\phi_h)
+-\kappa\bar\kappa\cos(\phi_R-\bar\phi_R)
+\Big] ,
+\end{aligned}
+\]
+whose three lines are the massless Collins-type correlation, an
+\(O(\sqrt{\rho_m})\) term mixing the transverse sector of one jet with
+the longitudinal sector of the other (vanishing at \(m=0\)), and an
+\(O(\rho_m)\) correction with the same sum-to-difference angle flip
+found in the exact massive double-transverse and double-Collins
+\(e^+e^-\) cross sections.
+
+\end{document}

@@ -1,0 +1,76 @@
+Notebook[{Cell["Spin-density master integral", "Title"], 
+  Cell["This notebook loads the separate DiracAlgebra` package, verifies the \
+Dirac algebra, evaluates the production traces, constructs the general \
+spin-density matrix with B, BBar and C, and builds the dihadron master \
+integral.", "Text"], Cell["Conventions and notation", "Section"], 
+  Cell["The metric is diag(1,-1,-1,-1), gamma matrices use the Weyl \
+representation, and the common physical spin basis is (x,y,z)=(-r,n,k). The \
+Bar suffix labels the antiquark or opposite jet and is not complex \
+conjugation. The code variables quarkPolarizationVector, \
+antiquarkPolarizationVector and correlationMatrix represent B_a, BBar_b and \
+C_ab, respectively.", "Text"], Cell["Load and verify the Dirac algebra", 
+   "Section"], 
+  Cell[BoxData[RowBox[{RowBox[{"notebookDirectory", "=", 
+        RowBox[{"NotebookDirectory", "[", "]"}]}], ";", 
+      RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", 
+          RowBox[{"{", RowBox[{"notebookDirectory", ",", 
+              "\"DiracAlgebra.wl\""}], "}"}], "]"}], "]"}], ";", 
+      RowBox[{"diracAlgebraChecks", "=", RowBox[{"AssertDiracAlgebra", "[", 
+          "]"}]}], ";", RowBox[{"If", "[", 
+        RowBox[{RowBox[{"diracAlgebraChecks", "===", "$Failed"}], ",", 
+          RowBox[{"Abort", "[", "]"}]}], "]"}], ";", "diracAlgebraChecks"}]], 
+   "Input", InitializationCell -> True], Cell["The returned association \
+explicitly checks the Clifford anticommutator, the Pauli anticommutator, the \
+definition and Weyl representation of gamma5, gamma5 squared, its \
+anticommutator with every gamma matrix, Hermiticity and traces.", "Text"], 
+  Cell["Evaluate the complete derivation", "Section"], 
+  Cell[BoxData[RowBox[{RowBox[{"Get", "[", RowBox[{"FileNameJoin", "[", 
+          RowBox[{"{", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], ",", 
+              "\"spin_density_master.wl\""}], "}"}], "]"}], "]"}], ";"}]], 
+   "Input", InitializationCell -> True], 
+  Cell["Explicit general spin-density matrix", "Section"], 
+  Cell["The basis is {|+,+>, |+,->, |-,+>, |-,->}. The matrix contains all \
+components of B, BBar and C explicitly.", "Text"], 
+  Cell[BoxData[TagBox["rhoGeneralExplicit", Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]], "Input"], 
+  Cell["Density-matrix consistency checks", "Subsection"], 
+  Cell[BoxData["spinDensityCoefficientChecks"], "Input"], 
+  Cell[BoxData[RowBox[
+     {"{", RowBox[{TagBox[RowBox[{"reducedDensityQ", "[", "bExplicit", "]"}], 
+         Function[BoxForm`e$, MatrixForm[BoxForm`e$]]], ",", 
+        TagBox[RowBox[{"reducedDensityQBar", "[", "bBarExplicit", "]"}], 
+         Function[BoxForm`e$, MatrixForm[BoxForm`e$]]]}], "}"}]], "Input"], 
+  Cell["Production result", "Section"], 
+  Cell[BoxData["quarkPolarizationVector"], "Input"], 
+  Cell[BoxData["antiquarkPolarizationVector"], "Input"], 
+  Cell[BoxData[TagBox["correlationMatrix", Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]], "Input"], 
+  Cell[BoxData[TagBox["photonDensityMatrix", Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]], "Input"], 
+  Cell["General production vertices", "Section"], 
+  Cell["For a different production process, supply its initial-state tensor \
+and the vertex matrices on the amplitude and conjugate-amplitude sides.", 
+   "Text"], 
+  Cell[BoxData[RowBox[{RowBox[{"generalParameters", "=", 
+        RowBox[{"spinParametersFromProduction", "[", 
+          RowBox[{"initialTensor", ",", "leftVertices", ",", "rightVertices", 
+            ",", "Identity"}], "]"}]}], ";", 
+      RowBox[{"{", RowBox[{RowBox[{"generalParameters", "[", "\"B\"", "]"}], 
+          ",", RowBox[{"generalParameters", "[", "\"BBar\"", "]"}], ",", 
+          RowBox[{"generalParameters", "[", "\"C\"", "]"}]}], "}"}]}]], 
+   "Input"], Cell["General spin-density kernel", "Section"], 
+  Cell[BoxData["spinDensityMasterGeneral"], "Input"], 
+  Cell[BoxData[TagBox["quarkPolarizationWeights", Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]], "Input"], 
+  Cell[BoxData[TagBox["antiquarkPolarizationWeights", 
+     Function[BoxForm`e$, MatrixForm[BoxForm`e$]]]], "Input"], 
+  Cell[BoxData[TagBox["spinDensityWeights", Function[BoxForm`e$, 
+      MatrixForm[BoxForm`e$]]]], "Input"], Cell["Master integration", 
+   "Section"], Cell[BoxData[RowBox[{"masterIntegral", "[", 
+      RowBox[{"quarkPolarizationVector", ",", "antiquarkPolarizationVector", 
+        ",", "correlationMatrix", ",", "1", ",", "fullAzimuthRanges"}], 
+      "]"}]], "Input"], Cell["Use quarkPolarizationIntegral, \
+antiquarkPolarizationIntegral and elementIntegral to project individual B_i, \
+BBar_j and C_ij channels.", "Text"]}, 
+ WindowTitle -> "Spin-density master integral", 
+ StyleDefinitions -> "Default.nb", Saveable -> True]
